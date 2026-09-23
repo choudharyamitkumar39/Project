@@ -5,3 +5,6 @@ venv/
 env/
 .pytest_cache/
 .coverage
+
+*.db
+data/

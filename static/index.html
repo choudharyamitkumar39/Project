@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fleet Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .online { color: green; font-weight: bold; }
+        .offline { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Mini Device Fleet Monitor</h1>
+    
+    <div class="card">
+        <h2>Fleet Summary</h2>
+        <p>Total Devices: <span id="total">0</span></p>
+        <p>Online: <span id="online" class="online">0</span></p>
+        <p>Offline: <span id="offline" class="offline">0</span></p>
+    </div>
+
+    <div class="card">
+        <h2>Devices</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Last Heartbeat</th>
+                </tr>
+            </thead>
+            <tbody id="device-list">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function fetchData() {
+            try {
+                const sumRes = await fetch('/summary');
+                const summary = await sumRes.json();
+                document.getElementById('total').innerText = summary.total;
+                document.getElementById('online').innerText = summary.online;
+                document.getElementById('offline').innerText = summary.offline;
+
+                const devRes = await fetch('/devices');
+                const devices = await devRes.json();
+                const tbody = document.getElementById('device-list');
+                tbody.innerHTML = '';
+                devices.forEach(d => {
+                    const row = '<tr>' +
+                        '<td>' + d.id + '</td>' +
+                        '<td>' + d.name + '</td>' +
+                        '<td class="' + d.status.toLowerCase() + '">' + d.status + '</td>' +
+                        '<td>' + (d.last_heartbeat || 'Never') + '</td>' +
+                    '</tr>';
+                    tbody.innerHTML += row;
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        setInterval(fetchData, 2000);
+        fetchData();
+    </script>
+</body>
+</html>

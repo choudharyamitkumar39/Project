@@ -91,3 +91,4 @@ curl http://localhost:8000/summary
 * **What it was used for**: Generating the boilerplate FastAPI scaffolding, generating the HTTP client requests for the simulator, drafting the pytest test suite, and scaffolding this README.
 * **Code Changed/Rejected**: The AI initially suggested checking the 30-second timeout via a background cron-job that periodically sweeps and updates statuses. I rejected this and changed it to evaluate the timeout *dynamically* at read-time (e.g., when GET /devices is called) to avoid unnecessary CPU cycles and synchronization bugs. Furthermore, I enforced adding timezone awareness (	zinfo=timezone.utc) to naive datetime objects provided by the AI.
 * **Personally Verified**: I personally verified the thread-safety locks in store.py to ensure concurrent heartbeats do not corrupt the device dictionary, and verified that all 5 pytest tests pass successfully in a clean environment.
+

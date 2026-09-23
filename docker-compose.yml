@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - TIMEOUT_SECONDS=30
+      - DB_PATH=/app/data/devices.db
+    volumes:
+      - ./data:/app/data

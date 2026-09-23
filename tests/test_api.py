@@ -2,12 +2,14 @@ from fastapi.testclient import TestClient
 from datetime import datetime, timezone, timedelta
 from src.main import app
 from src.api import store
+import sqlite3
 
 client = TestClient(app)
 
 def setup_function():
-    # Clear store before each test for isolation
-    store._devices.clear()
+    with store._lock:
+        store.conn.execute("DELETE FROM devices")
+        store.conn.commit()
 
 def test_register_device():
     response = client.post("/devices", json={"id": "dev-01", "name": "Lab 01"})
@@ -20,7 +22,6 @@ def test_register_device():
 
 def test_receive_heartbeat():
     client.post("/devices", json={"id": "dev-01", "name": "Lab 01"})
-    
     now = datetime.now(timezone.utc).isoformat()
     response = client.post("/devices/dev-01/heartbeat", json={"timestamp": now, "status": "OK"})
     assert response.status_code == 200
@@ -35,8 +36,6 @@ def test_heartbeat_device_not_found():
 
 def test_30_second_timeout():
     client.post("/devices", json={"id": "dev-01", "name": "Lab 01"})
-    
-    # Sent 35 seconds ago
     old_time = (datetime.now(timezone.utc) - timedelta(seconds=35)).isoformat()
     client.post("/devices/dev-01/heartbeat", json={"timestamp": old_time, "status": "OK"})
     

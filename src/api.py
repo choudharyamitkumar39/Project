@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException
-from typing import List
+from fastapi import APIRouter, HTTPException, Query
+from typing import List, Optional
 from .models import DeviceRegister, DeviceHeartbeat, DeviceStatus, FleetSummary
 from .store import DeviceStore
 
@@ -19,8 +19,8 @@ def receive_heartbeat(device_id: str, heartbeat: DeviceHeartbeat):
     return {"message": "Heartbeat recorded"}
 
 @router.get("/devices", response_model=List[DeviceStatus])
-def list_devices():
-    return store.get_all_devices()
+def list_devices(status: Optional[str] = Query(None, description="Filter by ONLINE or OFFLINE")):
+    return store.get_all_devices(status_filter=status)
 
 @router.get("/devices/{device_id}", response_model=DeviceStatus)
 def get_device(device_id: str):
